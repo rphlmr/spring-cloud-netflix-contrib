@@ -1,0 +1,64 @@
+---
+spring:
+  application:
+    name: routeplanner
+
+feign:
+  okhttp.enabled: true # Active okhttp
+  hystrix.enabled: true # Enable fallback; If false => no circuit breaker, retry harass sub services
+
+# Feign ribbon default configuration for µ services or Endpoints Legacy Webservices
+ribbon:
+  OkToRetryOnAllOperations: true # Activates retrieson GET and all verbs
+  #ConnectTimeout: 500 # Time to connect to the other service
+  ReadTimeout: 800 # Time for the other service to respond
+  MaxAutoRetries: 0 # Max number of retries on the same server (excluding the first try)
+  MaxAutoRetriesNextServer: 0 # Max number of next servers to retry (excluding the first server)
+
+trainplanner:
+  ribbon:
+    listOfServers: http://localhost:8081
+carplanner:
+  ribbon:
+    listOfServers: http://localhost:8082
+    #ReadTimeout: 6000
+
+hystrix:
+  metrics:
+    enabled: true
+  threadpool:
+    default:
+      coreSize: 50
+  command:
+    default:
+      execution:
+          isolation:
+            thread:
+              timeoutInMilliseconds: 500
+            strategy: THREAD #or SEMAPHORE
+            #semaphore.maxConcurrentRequests: 500
+          timeout.enabled: false # Disable default timeout on hystrix
+      #fallback.isolation.semaphore.maxConcurrentRequests: 500
+#    TrainPlannerHandler#findTrainPlanFor(String,String,LocalDateTime):
+#      execution:
+#        timeout.enabled: false
+#        isolation:
+#          thread:
+#            timeoutInMilliseconds: 2000
+logging:
+  level: fine
+
+#hystrix.command.default.circuitBreaker.enabled: true
+## Définit la taille du pool de threads Hystrix.
+#hystrix.threadpool.default.coreSize: 50
+## Le seuil à partir duquel Hystrix peut ouvrir le circuit.
+#hystrix.command.default.circuitBreaker.requestVolumeThreshold: 20
+## Le pourcentage d’appels en erreur VS en succès.
+## Une fois atteint et que le seuil circuitBreaker.requestVolumeThreshold est atteint aussi, Hystrix ouvre le circuit.
+#hystrix.command.default.circuitBreaker.errorThresholdPercentage: 20
+## La fenêtre de temps pendant laquelle Hystrix calcule le pourcentage d’appel en échec (durée d’observation)
+## pour ouvrir ou pas le circuit. les statistiques sont remises à zéro à chaque début de cette fenêtre.
+#hystrix.command.default.metrics.rollingStats.timeInMilliseconds: 1000
+## Définit la durée d’ouverture du circuit durant lequel Hystrix n’émet pas d’appel vers la ressource externe.
+#hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds: 5000
+
